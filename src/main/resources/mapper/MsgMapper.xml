@@ -1,0 +1,310 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.zzj.mapper.MsgMapper" >
+  <resultMap id="BaseResultMap" type="com.zzj.entity.Msg" >
+    <id column="id" property="id" jdbcType="VARCHAR" />
+    <result column="type" property="type" jdbcType="VARCHAR" />
+    <result column="source" property="source" jdbcType="VARCHAR" />
+    <result column="target" property="target" jdbcType="VARCHAR" />
+    <result column="involvedtype" property="involvedtype" jdbcType="VARCHAR" />
+    <result column="involvedid" property="involvedid" jdbcType="VARCHAR" />
+    <result column="content" property="content" jdbcType="VARCHAR" />
+    <result column="read" property="read" jdbcType="INTEGER" />
+    <result column="createdate" property="createdate" jdbcType="TIMESTAMP" />
+    <association property="sourceUser" resultMap="sourceUserResultMap"/>
+    <association property="targetUser" resultMap="targetUserResultMap"/>
+    <association property="involvedArticle" resultMap="articleResultMap"/>
+    <association property="involvedArticlecomment" resultMap="articlecommentResultMap"/>
+
+  </resultMap>
+  <resultMap id="sourceUserResultMap" type="com.zzj.entity.User" >
+    <id column="sourceUser.id" property="id" jdbcType="VARCHAR" />
+    <result column="sourceUser.nickname" property="nickname" jdbcType="VARCHAR" />
+  </resultMap>
+  <resultMap id="targetUserResultMap" type="com.zzj.entity.User" >
+    <id column="targetUser.id" property="id" jdbcType="VARCHAR" />
+    <result column="targetUser.nickname" property="nickname" jdbcType="VARCHAR" />
+  </resultMap>
+    <resultMap id="articleResultMap" type="com.zzj.entity.Article" >
+        <id column="involvedArticle.id" property="id" jdbcType="VARCHAR" />
+        <result column="involvedArticle.title" property="title" jdbcType="VARCHAR" />
+    </resultMap>
+    <resultMap id="articlecommentResultMap" type="com.zzj.entity.Article" >
+        <id column="involvedArticlecomment.id" property="id" jdbcType="VARCHAR" />
+        <result column="involvedArticlecomment.comments" property="comments" jdbcType="VARCHAR" />
+    </resultMap>
+
+    <sql id="Example_Where_Clause" >
+    <where >
+      <foreach collection="oredCriteria" item="criteria" separator="or" >
+        <if test="criteria.valid" >
+          <trim prefix="(" suffix=")" prefixOverrides="and" >
+            <foreach collection="criteria.criteria" item="criterion" >
+              <choose >
+                <when test="criterion.noValue" >
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue" >
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue" >
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue" >
+                  and ${criterion.condition}
+                  <foreach collection="criterion.value" item="listItem" open="(" close=")" separator="," >
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Update_By_Example_Where_Clause" >
+    <where >
+      <foreach collection="example.oredCriteria" item="criteria" separator="or" >
+        <if test="criteria.valid" >
+          <trim prefix="(" suffix=")" prefixOverrides="and" >
+            <foreach collection="criteria.criteria" item="criterion" >
+              <choose >
+                <when test="criterion.noValue" >
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue" >
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue" >
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue" >
+                  and ${criterion.condition}
+                  <foreach collection="criterion.value" item="listItem" open="(" close=")" separator="," >
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Base_Column_List" >
+    a.id as "id", a.type as "type", a.source as "source", a.target as "target", a.involvedtype as "involvedtype", a.involvedid as "involvedid", a.content as "content", a.read as "read", a.createdate as "createdate",
+    usource.id as 'sourceUser.id',usource.nickname as 'sourceUser.nickname',
+    utarget.id as 'targetUser.id',utarget.nickname as 'targetUser.nickname',
+    art.id as 'involvedArticle.id',art.title as 'involvedArticle.title',
+    artc.id as 'involvedArticlecomment.id',artc.comments as 'involvedArticlecomment.comments'
+  </sql>
+  <select id="selectByExample" resultMap="BaseResultMap" parameterType="com.zzj.entity.MsgExample" >
+    select
+    <if test="distinct" >
+      distinct
+    </if>
+    'true' as QUERYID,
+    <include refid="Base_Column_List" />
+    from msg a
+    left join user usource on usource.id = a.source
+    left join user utarget on utarget.id = a.target
+    left join article art on a.involvedid = art.id
+    left join articlecomment artc on a.involvedid = artc.id
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null" >
+      order by ${orderByClause}
+    </if>
+  </select>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from msg a
+    left join user usource on usource.id = a.source
+    left join user utarget on utarget.id = a.target
+    left join article art on a.involvedid = art.id
+    left join articlecomment artc on a.involvedid = artc.id
+    where a.id = #{id,jdbcType=VARCHAR}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String" >
+    delete from msg
+    where id = #{id,jdbcType=VARCHAR}
+  </delete>
+  <delete id="deleteByExample" parameterType="com.zzj.entity.MsgExample" >
+    delete from msg
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+  </delete>
+  <insert id="insert" parameterType="com.zzj.entity.Msg" >
+    insert into msg (id, type, source, 
+      target, involvedtype, involvedid, 
+      content, `read`, createdate
+      )
+    values (#{id,jdbcType=VARCHAR}, #{type,jdbcType=VARCHAR}, #{source,jdbcType=VARCHAR}, 
+      #{target,jdbcType=VARCHAR}, #{involvedtype,jdbcType=VARCHAR}, #{involvedid,jdbcType=VARCHAR}, 
+      #{content,jdbcType=VARCHAR}, #{read,jdbcType=INTEGER}, #{createdate,jdbcType=TIMESTAMP}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="com.zzj.entity.Msg" >
+    insert into msg
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="type != null" >
+        type,
+      </if>
+      <if test="source != null" >
+        source,
+      </if>
+      <if test="target != null" >
+        target,
+      </if>
+      <if test="involvedtype != null" >
+        involvedtype,
+      </if>
+      <if test="involvedid != null" >
+        involvedid,
+      </if>
+      <if test="content != null" >
+        content,
+      </if>
+      <if test="read != null" >
+        read,
+      </if>
+      <if test="createdate != null" >
+        createdate,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=VARCHAR},
+      </if>
+      <if test="type != null" >
+        #{type,jdbcType=VARCHAR},
+      </if>
+      <if test="source != null" >
+        #{source,jdbcType=VARCHAR},
+      </if>
+      <if test="target != null" >
+        #{target,jdbcType=VARCHAR},
+      </if>
+      <if test="involvedtype != null" >
+        #{involvedtype,jdbcType=VARCHAR},
+      </if>
+      <if test="involvedid != null" >
+        #{involvedid,jdbcType=VARCHAR},
+      </if>
+      <if test="content != null" >
+        #{content,jdbcType=VARCHAR},
+      </if>
+      <if test="read != null" >
+        #{read,jdbcType=INTEGER},
+      </if>
+      <if test="createdate != null" >
+        #{createdate,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+  <select id="countByExample" parameterType="com.zzj.entity.MsgExample" resultType="java.lang.Integer" >
+    select count(*) from msg
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+  </select>
+  <update id="updateByExampleSelective" parameterType="map" >
+    update msg
+    <set >
+      <if test="record.id != null" >
+        id = #{record.id,jdbcType=VARCHAR},
+      </if>
+      <if test="record.type != null" >
+        type = #{record.type,jdbcType=VARCHAR},
+      </if>
+      <if test="record.source != null" >
+        source = #{record.source,jdbcType=VARCHAR},
+      </if>
+      <if test="record.target != null" >
+        target = #{record.target,jdbcType=VARCHAR},
+      </if>
+      <if test="record.involvedtype != null" >
+        involvedtype = #{record.involvedtype,jdbcType=VARCHAR},
+      </if>
+      <if test="record.involvedid != null" >
+        involvedid = #{record.involvedid,jdbcType=VARCHAR},
+      </if>
+      <if test="record.content != null" >
+        content = #{record.content,jdbcType=VARCHAR},
+      </if>
+      <if test="record.read != null" >
+        read = #{record.read,jdbcType=INTEGER},
+      </if>
+      <if test="record.createdate != null" >
+        createdate = #{record.createdate,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    <if test="_parameter != null" >
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByExample" parameterType="map" >
+    update msg
+    set id = #{record.id,jdbcType=VARCHAR},
+      type = #{record.type,jdbcType=VARCHAR},
+      source = #{record.source,jdbcType=VARCHAR},
+      target = #{record.target,jdbcType=VARCHAR},
+      involvedtype = #{record.involvedtype,jdbcType=VARCHAR},
+      involvedid = #{record.involvedid,jdbcType=VARCHAR},
+      content = #{record.content,jdbcType=VARCHAR},
+      read = #{record.read,jdbcType=INTEGER},
+      createdate = #{record.createdate,jdbcType=TIMESTAMP}
+    <if test="_parameter != null" >
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByPrimaryKeySelective" parameterType="com.zzj.entity.Msg" >
+    update msg
+    <set >
+      <if test="type != null" >
+        `type` = #{type,jdbcType=VARCHAR},
+      </if>
+      <if test="source != null" >
+        source = #{source,jdbcType=VARCHAR},
+      </if>
+      <if test="target != null" >
+        target = #{target,jdbcType=VARCHAR},
+      </if>
+      <if test="involvedtype != null" >
+        involvedtype = #{involvedtype,jdbcType=VARCHAR},
+      </if>
+      <if test="involvedid != null" >
+        involvedid = #{involvedid,jdbcType=VARCHAR},
+      </if>
+      <if test="content != null" >
+        content = #{content,jdbcType=VARCHAR},
+      </if>
+      <if test="read != null" >
+        `read` = #{read,jdbcType=INTEGER},
+      </if>
+      <if test="createdate != null" >
+        createdate = #{createdate,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where id = #{id,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.zzj.entity.Msg" >
+    update msg
+    set type = #{type,jdbcType=VARCHAR},
+      source = #{source,jdbcType=VARCHAR},
+      target = #{target,jdbcType=VARCHAR},
+      involvedtype = #{involvedtype,jdbcType=VARCHAR},
+      involvedid = #{involvedid,jdbcType=VARCHAR},
+      content = #{content,jdbcType=VARCHAR},
+      read = #{read,jdbcType=INTEGER},
+      createdate = #{createdate,jdbcType=TIMESTAMP}
+    where id = #{id,jdbcType=VARCHAR}
+  </update>
+</mapper>
